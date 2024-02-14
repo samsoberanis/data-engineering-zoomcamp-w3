@@ -1,0 +1,33 @@
+Below the queries used to complete the Data Engineering Zoomcamp Week 3s homework
+
+-- Create an external table using the Green Taxi Trip Records Data for 2022. 
+CREATE OR REPLACE EXTERNAL TABLE `dtc-de-course-413016.ny_taxi.external_green_tripdata`
+OPTIONS (
+  format = 'PARQUET',
+  uris = ['gs://green-taxi-data-2022-sam/2022/green_tripdata_2022-*.parquet']
+);
+
+-- Create a table in BQ using the Green Taxi Trip Records for 2022 (do not partition or cluster this table). 
+CREATE OR REPLACE TABLE `dtc-de-course-413016.ny_taxi.external_green_tripdata_materialized` AS (
+  SELECT * FROM `dtc-de-course-413016.ny_taxi.external_green_tripdata`
+);
+
+-- Q1
+SELECT COUNT(*) FROM `dtc-de-course-413016.ny_taxi.external_green_tripdata`;
+
+-- Q2
+SELECT DISTINCT(COUNT(PULocationID)) FROM `dtc-de-course-413016.ny_taxi.external_green_tripdata_materialized`;
+
+-- Q3
+SELECT COUNT(fare_amount) FROM `dtc-de-course-413016.ny_taxi.external_green_tripdata`
+WHERE fare_amount = 0;
+
+-- Q4
+CREATE OR REPLACE TABLE dtc-de-course-413016.ny_taxi.external_green_tripdata_partitoned
+PARTITION BY DATE(lpep_pickup_datetime) 
+CLUSTER BY PUlocationID AS 
+SELECT * FROM dtc-de-course-413016.ny_taxi.external_green_tripdata;
+
+-- Q5
+SELECT DISTINCT(PULocationID) FROM `dtc-de-course-413016.ny_taxi.external_green_tripdata`
+WHERE lpep_pickup_datetime BETWEEN '2022-06-01' and '2022-06-30';
